@@ -17,7 +17,7 @@ class CryptoGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Crypto Client GUI")
-        self.root.geometry("600x500")
+        self.root.geometry("800x700")
         self.root.resizable(True, True)
         
         # Create the crypto client
@@ -51,6 +51,9 @@ class CryptoGUI:
         paste_button = ttk.Button(input_button_frame, text="Paste Input", command=self.paste_input)
         paste_button.pack(side=tk.RIGHT, padx=5)
         
+        open_file_button = ttk.Button(input_button_frame, text="Open File", command=self.open_file)
+        open_file_button.pack(side=tk.RIGHT, padx=5)
+        
         # Buttons section
         button_frame = ttk.Frame(main_frame, padding="5")
         button_frame.pack(fill=tk.X, pady=5)
@@ -75,11 +78,15 @@ class CryptoGUI:
         output_button_frame = ttk.Frame(output_frame, padding="5")
         output_button_frame.pack(fill=tk.X, pady=5)
         
-        save_button = ttk.Button(output_button_frame, text="Save to File", command=self.save_output)
-        save_button.pack(side=tk.RIGHT, padx=5)
+        # Create a frame for the right-aligned buttons
+        right_buttons = ttk.Frame(output_button_frame)
+        right_buttons.pack(side=tk.RIGHT)
         
-        copy_button = ttk.Button(output_button_frame, text="Copy Output", command=self.copy_output)
+        copy_button = ttk.Button(right_buttons, text="Copy Output", command=self.copy_output)
         copy_button.pack(side=tk.RIGHT, padx=5)
+        
+        save_button = ttk.Button(right_buttons, text="Save to File", command=self.save_output)
+        save_button.pack(side=tk.RIGHT, padx=5)
         
         # Status bar
         self.status_var = tk.StringVar()
@@ -91,6 +98,7 @@ class CryptoGUI:
         self.root.bind('<Control-c>', lambda e: self.copy_output())
         self.root.bind('<Control-v>', lambda e: self.paste_input())
         self.root.bind('<Control-s>', lambda e: self.save_output())
+        self.root.bind('<Control-o>', lambda e: self.open_file())
     
     def encrypt_data(self):
         """Encrypt the data in the input text area."""
@@ -215,6 +223,24 @@ class CryptoGUI:
                 self.status_var.set("Clipboard is empty")
         except tk.TclError:
             self.status_var.set("No text in clipboard")
+    
+    def open_file(self):
+        """Open a file and load its contents into the input area."""
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Open File"
+        )
+        
+        if file_path:  # User didn't cancel
+            try:
+                with open(file_path, 'r') as f:
+                    content = f.read()
+                self.input_text.delete("1.0", tk.END)
+                self.input_text.insert("1.0", content)
+                self.status_var.set(f"Loaded file: {file_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open file: {e}")
+                self.status_var.set("Failed to open file")
 
 def main():
     root = tk.Tk()
