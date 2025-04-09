@@ -40,6 +40,8 @@ This system employs a client-server architecture with privilege separation to en
    sudo apt install python3-tk
    ```
 
+*Optional: Change the default configuration values in config.py.*
+
 3. Run the installer as root:
    ```
    sudo python3 install.py
@@ -73,7 +75,7 @@ crypto-client decrypt "gAAAAABkX..."
 ```
 
 ### GUI Application
-
+Start from a terminal:
 ```bash
 crypto-gui &
 ```
