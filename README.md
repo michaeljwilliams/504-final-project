@@ -26,15 +26,21 @@ The system uses Unix domain sockets for secure local IPC (Inter-Process Communic
 
 - Linux system with systemd (Ubuntu 18.04+ or similar)
 - Python 3.6+ with the following packages:
-  - cryptography
-  - tkinter (for the GUI)
+  - cryptography (for cryptographic operations)
+  - tkinter (for the GUI application)
+  - systemd (for service management)
 
 ### Steps
 
 1. Clone the repository
 2. Install dependencies:
-   ```
-   pip3 install cryptography
+   ```bash
+   # Install Python dependencies
+   pip3 install -r requirements.txt
+   
+   # On Ubuntu/Debian, install systemd and tkinter packages
+   sudo apt-get update
+   sudo apt-get install python3-tk
    ```
 
 3. Run the installer as root:
@@ -47,6 +53,15 @@ The installer will:
 - Install the crypto server as a systemd service
 - Generate an encryption key with proper permissions
 - Set up the client tools
+
+4. Add users to the crypto-service group:
+   ```bash
+   # Add a user to the crypto-service group
+   sudo usermod -a -G crypto-service username
+   
+   # IMPORTANT: Users must log out and log back in for group changes to take effect
+   # The new group membership will not be active until the next login
+   ```
 
 ## Usage
 

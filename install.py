@@ -154,6 +154,15 @@ def install_systemd_service():
         # Set proper permissions
         os.chmod(service_file, 0o644)
         
+        # Create socket directory if it doesn't exist
+        socket_dir = os.path.dirname(SOCKET_PATH)
+        os.makedirs(socket_dir, exist_ok=True)
+        
+        # Set socket permissions to allow group access
+        if os.path.exists(SOCKET_PATH):
+            os.chmod(SOCKET_PATH, 0o660)  # rw-rw----
+            os.chown(SOCKET_PATH, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
+        
         # Reload systemd, enable and start the service
         subprocess.check_call(["systemctl", "daemon-reload"])
         subprocess.check_call(["systemctl", "enable", CRYPTO_SERVICE_NAME])
