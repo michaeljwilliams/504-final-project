@@ -107,4 +107,4 @@ sudo python3 install.py --uninstall
 - Keep access logs
 - Add ability to use multiple secrets
 - Use a stronger cryptographic algorithm/library than Fernet (AES-128 CBC)
-- Make the app more portable by adding Windows support via OS detection, service account (Windows Server only), and DPAPI
+- Make the app more portable by adding Windows support via OS detection, service account (Windows Server only), and DPAPI; or employ a networked model with server on a separate machine for maximum portability
