@@ -9,18 +9,22 @@ import getpass
 import pwd
 import grp
 from pathlib import Path
+from config import (
+    CRYPTO_SERVICE_NAME,
+    CRYPTO_USER,
+    CRYPTO_GROUP,
+    INSTALL_DIR,
+    KEY_DIR,
+    KEY_FILE_PATH,
+    SOCKET_PATH,
+    KEY_FILE_PERMS,
+    SOCKET_PERMS,
+    INSTALL_DIR_PERMS
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('crypto_installer')
-
-# Constants
-CRYPTO_SERVICE_NAME = "crypto-server"
-CRYPTO_USER = "crypto-service"
-CRYPTO_GROUP = "crypto-service"
-KEY_DIR = "/etc/cryptoapp/keys"
-SOCKET_PATH = "/tmp/crypto_server.sock"
-INSTALL_DIR = "/opt/cryptoapp"
 
 # Systemd service file template
 SYSTEMD_SERVICE_TEMPLATE = """[Unit]
@@ -105,7 +109,7 @@ def install_files():
         
         # Set proper permissions
         os.chown(INSTALL_DIR, 0, 0)  # root:root for install dir
-        os.chmod(INSTALL_DIR, 0o755)  # rwxr-xr-x
+        os.chmod(INSTALL_DIR, INSTALL_DIR_PERMS)
         
         os.chown(KEY_DIR, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
         os.chmod(KEY_DIR, 0o700)  # Only the crypto user can access it
@@ -119,17 +123,15 @@ def install_files():
 def generate_key():
     """Generate a new encryption key."""
     try:
-        key_path = os.path.join(KEY_DIR, "encryption.key")
-        
         # Use the server to generate the key
         server_path = os.path.join(INSTALL_DIR, "crypto_server.py")
-        subprocess.check_call([server_path, "--generate-key", "--key-path", key_path])
+        subprocess.check_call([server_path, "--generate-key", "--key-path", KEY_FILE_PATH])
         
         # Set proper permissions on the key file
-        os.chown(key_path, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
-        os.chmod(key_path, 0o400)  # Only readable by the crypto user
+        os.chown(KEY_FILE_PATH, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
+        os.chmod(KEY_FILE_PATH, KEY_FILE_PERMS)
         
-        logger.info(f"Encryption key generated at {key_path}")
+        logger.info(f"Encryption key generated at {KEY_FILE_PATH}")
         return True
     except Exception as e:
         logger.error(f"Failed to generate key: {e}")
@@ -157,11 +159,6 @@ def install_systemd_service():
         # Create socket directory if it doesn't exist
         socket_dir = os.path.dirname(SOCKET_PATH)
         os.makedirs(socket_dir, exist_ok=True)
-        
-        # Set socket permissions to allow group access
-        if os.path.exists(SOCKET_PATH):
-            os.chmod(SOCKET_PATH, 0o660)  # rw-rw----
-            os.chown(SOCKET_PATH, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
         
         # Reload systemd, enable and start the service
         subprocess.check_call(["systemctl", "daemon-reload"])

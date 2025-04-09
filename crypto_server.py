@@ -13,14 +13,19 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import pwd
+import grp
+from config import (
+    CRYPTO_USER,
+    CRYPTO_GROUP,
+    KEY_FILE_PATH,
+    SOCKET_PATH,
+    SOCKET_PERMS
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('crypto_server')
-
-# Constants
-SOCKET_PATH = '/tmp/crypto_server.sock'
-KEY_FILE_PATH = '/etc/cryptoapp/keys/encryption.key'
 
 class CryptoServer:
     def __init__(self, key_path, socket_path):
@@ -132,7 +137,11 @@ class CryptoServer:
         # Create the socket and start listening
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.bind(self.socket_path)
-        os.chmod(self.socket_path, 0o600)  # Only owner can read/write
+        
+        # Set proper ownership and permissions
+        os.chown(self.socket_path, pwd.getpwnam(CRYPTO_USER).pw_uid, grp.getgrnam(CRYPTO_GROUP).gr_gid)
+        os.chmod(self.socket_path, 0o660)  # Allow group read/write
+        
         sock.listen(1)
         logger.info(f"Server started and listening on {self.socket_path}")
         
