@@ -48,10 +48,7 @@ class CryptoGUI:
         input_button_frame = ttk.Frame(input_frame, padding="5")
         input_button_frame.pack(fill=tk.X, pady=5)
         
-        copy_input_button = ttk.Button(input_button_frame, text="Copy Input (Ctrl+C)", command=self.copy_input)
-        copy_input_button.pack(side=tk.RIGHT, padx=5)
-        
-        paste_button = ttk.Button(input_button_frame, text="Paste (Ctrl+V)", command=self.paste_input)
+        paste_button = ttk.Button(input_button_frame, text="Paste Input", command=self.paste_input)
         paste_button.pack(side=tk.RIGHT, padx=5)
         
         # Buttons section
@@ -74,15 +71,15 @@ class CryptoGUI:
         self.output_text = scrolledtext.ScrolledText(output_frame, wrap=tk.WORD, height=8)
         self.output_text.pack(fill=tk.BOTH, expand=True)
         
-        # Copy and Save buttons for output
+        # Output buttons
         output_button_frame = ttk.Frame(output_frame, padding="5")
         output_button_frame.pack(fill=tk.X, pady=5)
         
-        copy_button = ttk.Button(output_button_frame, text="Copy Output (Ctrl+Shift+C)", command=self.copy_output)
-        copy_button.pack(side=tk.RIGHT, padx=5)
-        
-        save_button = ttk.Button(output_button_frame, text="Save to File (Ctrl+S)", command=self.save_output)
+        save_button = ttk.Button(output_button_frame, text="Save to File", command=self.save_output)
         save_button.pack(side=tk.RIGHT, padx=5)
+        
+        copy_button = ttk.Button(output_button_frame, text="Copy Output", command=self.copy_output)
+        copy_button.pack(side=tk.RIGHT, padx=5)
         
         # Status bar
         self.status_var = tk.StringVar()
@@ -91,10 +88,9 @@ class CryptoGUI:
         status_bar.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
         
         # Bind keyboard shortcuts
-        self.root.bind('<Control-c>', lambda e: self.copy_input())
+        self.root.bind('<Control-c>', lambda e: self.copy_output())
         self.root.bind('<Control-v>', lambda e: self.paste_input())
         self.root.bind('<Control-s>', lambda e: self.save_output())
-        self.root.bind('<Control-Shift-C>', lambda e: self.copy_output())
     
     def encrypt_data(self):
         """Encrypt the data in the input text area."""
@@ -219,16 +215,6 @@ class CryptoGUI:
                 self.status_var.set("Clipboard is empty")
         except tk.TclError:
             self.status_var.set("No text in clipboard")
-    
-    def copy_input(self):
-        """Copy the input text to clipboard."""
-        input_text = self.input_text.get("1.0", tk.END).strip()
-        if input_text:
-            self.root.clipboard_clear()
-            self.root.clipboard_append(input_text)
-            self.status_var.set("Input copied to clipboard")
-        else:
-            self.status_var.set("No input to copy")
 
 def main():
     root = tk.Tk()
