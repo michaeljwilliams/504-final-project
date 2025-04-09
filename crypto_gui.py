@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import ttk, messagebox, scrolledtext, filedialog
 import threading
 import queue
 import logging
@@ -44,6 +44,13 @@ class CryptoGUI:
         self.input_text = scrolledtext.ScrolledText(input_frame, wrap=tk.WORD, height=8)
         self.input_text.pack(fill=tk.BOTH, expand=True)
         
+        # Input buttons
+        input_button_frame = ttk.Frame(input_frame, padding="5")
+        input_button_frame.pack(fill=tk.X, pady=5)
+        
+        paste_button = ttk.Button(input_button_frame, text="Paste", command=self.paste_input)
+        paste_button.pack(side=tk.RIGHT, padx=5)
+        
         # Buttons section
         button_frame = ttk.Frame(main_frame, padding="5")
         button_frame.pack(fill=tk.X, pady=5)
@@ -64,11 +71,26 @@ class CryptoGUI:
         self.output_text = scrolledtext.ScrolledText(output_frame, wrap=tk.WORD, height=8)
         self.output_text.pack(fill=tk.BOTH, expand=True)
         
+        # Copy and Save buttons for output
+        output_button_frame = ttk.Frame(output_frame, padding="5")
+        output_button_frame.pack(fill=tk.X, pady=5)
+        
+        copy_button = ttk.Button(output_button_frame, text="Copy Output", command=self.copy_output)
+        copy_button.pack(side=tk.RIGHT, padx=5)
+        
+        save_button = ttk.Button(output_button_frame, text="Save to File", command=self.save_output)
+        save_button.pack(side=tk.RIGHT, padx=5)
+        
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
+        
+        # Bind keyboard shortcuts
+        self.root.bind('<Control-c>', lambda e: self.copy_output())
+        self.root.bind('<Control-v>', lambda e: self.paste_input())
+        self.root.bind('<Control-s>', lambda e: self.save_output())
     
     def encrypt_data(self):
         """Encrypt the data in the input text area."""
@@ -118,6 +140,39 @@ class CryptoGUI:
         self.output_text.delete("1.0", tk.END)
         self.status_var.set("Ready")
     
+    def copy_output(self):
+        """Copy the output text to clipboard."""
+        output = self.output_text.get("1.0", tk.END).strip()
+        if output:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(output)
+            self.status_var.set("Output copied to clipboard")
+        else:
+            self.status_var.set("No output to copy")
+    
+    def save_output(self):
+        """Save the output text to a file."""
+        output = self.output_text.get("1.0", tk.END).strip()
+        if not output:
+            self.status_var.set("No output to save")
+            return
+        
+        # Ask user for file location
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Save Output"
+        )
+        
+        if file_path:  # User didn't cancel
+            try:
+                with open(file_path, 'w') as f:
+                    f.write(output)
+                self.status_var.set(f"Output saved to {file_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save file: {e}")
+                self.status_var.set("Failed to save output")
+    
     def check_queue(self):
         """Check the queue for results from the worker threads."""
         try:
@@ -147,6 +202,19 @@ class CryptoGUI:
         finally:
             # Schedule to check again after 100ms
             self.root.after(100, self.check_queue)
+    
+    def paste_input(self):
+        """Paste clipboard content into input text area."""
+        try:
+            clipboard_text = self.root.clipboard_get()
+            if clipboard_text:
+                self.input_text.delete("1.0", tk.END)
+                self.input_text.insert("1.0", clipboard_text)
+                self.status_var.set("Pasted from clipboard")
+            else:
+                self.status_var.set("Clipboard is empty")
+        except tk.TclError:
+            self.status_var.set("No text in clipboard")
 
 def main():
     root = tk.Tk()
