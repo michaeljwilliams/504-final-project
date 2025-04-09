@@ -4,7 +4,7 @@ import socket
 import json
 import base64
 import logging
-from typing import Dict, Any, Union, Optional
+from typing import Dict, Any, Union
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

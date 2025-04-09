@@ -106,3 +106,4 @@ sudo python3 install.py --uninstall
 - Separate client and server by putting the server on another machine - prevents possible memory inspection from clients that are able to elevate privileges
 - Keep access logs
 - Add ability to use multiple secrets
+- Use a stronger cryptographic algorithm/library than Fernet (AES-128 CBC)

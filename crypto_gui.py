@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import sys
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 import threading
 import queue
 import logging
 
-# Import our crypto client
+# Import our crypto client and config
 from crypto_client import CryptoClient
+from config import SOCKET_PATH
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -20,8 +20,8 @@ class CryptoGUI:
         self.root.geometry("800x700")
         self.root.resizable(True, True)
         
-        # Create the crypto client
-        self.client = CryptoClient()
+        # Create the crypto client with the configured socket path
+        self.client = CryptoClient(socket_path=SOCKET_PATH)
         
         # Create a queue for thread-safe communication
         self.queue = queue.Queue()
@@ -244,7 +244,7 @@ class CryptoGUI:
 
 def main():
     root = tk.Tk()
-    app = CryptoGUI(root)
+    CryptoGUI(root)
     root.mainloop()
 
 if __name__ == "__main__":

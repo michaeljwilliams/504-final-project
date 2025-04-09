@@ -5,10 +5,8 @@ import shutil
 import argparse
 import subprocess
 import logging
-import getpass
 import pwd
 import grp
-from pathlib import Path
 from config import (
     CRYPTO_SERVICE_NAME,
     CRYPTO_USER,
@@ -18,7 +16,6 @@ from config import (
     KEY_FILE_PATH,
     SOCKET_PATH,
     KEY_FILE_PERMS,
-    SOCKET_PERMS,
     INSTALL_DIR_PERMS
 )
 
@@ -206,7 +203,7 @@ def uninstall():
         try:
             subprocess.check_call(["systemctl", "stop", CRYPTO_SERVICE_NAME])
             subprocess.check_call(["systemctl", "disable", CRYPTO_SERVICE_NAME])
-        except:
+        except subprocess.CalledProcessError:
             logger.warning("Failed to stop/disable service (might not be installed)")
         
         # Remove service file
@@ -231,7 +228,7 @@ def uninstall():
             try:
                 subprocess.check_call(["userdel", CRYPTO_USER])
                 subprocess.check_call(["groupdel", CRYPTO_GROUP])
-            except:
+            except subprocess.CalledProcessError:
                 logger.warning("Failed to remove user/group (might not exist)")
         
         logger.info("Uninstallation complete")
@@ -271,7 +268,7 @@ def main():
             return
     
     logger.info("Installation completed successfully")
-    logger.info(f"The crypto service is now running. You can use 'crypto-client' and 'crypto-gui' to interact with it.")
+    logger.info("The crypto service is now running. You can use 'crypto-client' and 'crypto-gui' to interact with it.")
     logger.info(f"Service status: systemctl status {CRYPTO_SERVICE_NAME}")
 
 if __name__ == "__main__":

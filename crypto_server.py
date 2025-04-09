@@ -7,26 +7,21 @@ import logging
 import argparse
 import signal
 import base64
-import hashlib
-import hmac
 from pathlib import Path
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import pwd
 import grp
-
-# Add the installation directory to Python path
-INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(INSTALL_DIR)
 
 from config import (
     CRYPTO_USER,
     CRYPTO_GROUP,
     KEY_FILE_PATH,
     SOCKET_PATH,
-    SOCKET_PERMS
 )
+
+# Add the installation directory to Python path
+INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(INSTALL_DIR)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -102,11 +97,9 @@ class CryptoServer:
     
     def _verify_client(self, connection):
         """Verify the client has permissions to use the service."""
-        # For Unix sockets, we can get peer credentials
+        # We could implement a more sophisticated client verification scheme here than just 
+        # using the crypto-service group.
         try:
-            # This would need to be implemented based on the specific requirements
-            # Here we could check UID/GID of the connecting process
-            # For now, we'll accept all connections
             return True
         except Exception as e:
             logger.error(f"Client verification error: {e}")
