@@ -15,6 +15,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import pwd
 import grp
+
+# Add the installation directory to Python path
+INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(INSTALL_DIR)
+
 from config import (
     CRYPTO_USER,
     CRYPTO_GROUP,

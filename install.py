@@ -95,10 +95,12 @@ def install_files():
         server_script = os.path.join(script_dir, "crypto_server.py")
         client_script = os.path.join(script_dir, "crypto_client.py")
         gui_script = os.path.join(script_dir, "crypto_gui.py")
+        config_script = os.path.join(script_dir, "config.py")
         
         shutil.copy2(server_script, os.path.join(INSTALL_DIR, "crypto_server.py"))
         shutil.copy2(client_script, os.path.join(INSTALL_DIR, "crypto_client.py"))
         shutil.copy2(gui_script, os.path.join(INSTALL_DIR, "crypto_gui.py"))
+        shutil.copy2(config_script, os.path.join(INSTALL_DIR, "config.py"))
         
         # Make the server script executable
         server_path = os.path.join(INSTALL_DIR, "crypto_server.py")
