@@ -8,17 +8,15 @@ This system employs a client-server architecture with privilege separation to en
 
 1. **Crypto Server**: Runs as a privileged service that manages the encryption key and performs cryptographic operations
 2. **Client Library**: Provides a simple API for applications to request encryption/decryption services
-3. **GUI Application**: Demonstrates how to use the client library with a simple interface
-
-The system uses Unix domain sockets for secure local IPC (Inter-Process Communication) between the client and server components. This approach leverages the Linux permission model to ensure that only authorized processes can communicate with the server.
+3. **GUI Application**: Uses the client library with a simple interface
 
 ## Security Features
 
 - Privilege separation between the crypto service and client applications
-- Unix domain socket permission controls
+- Unix domain socket permission controls - only authorized processes can communicate with the server
 - Server runs as a dedicated user with minimal privileges
 - Encryption key stored with restrictive file permissions (0400)
-- Process credential verification for client authentication
+- Process credential verification for client authentication - only users in the dedicated group can access the service
 
 ## Installation
 
@@ -35,12 +33,11 @@ The system uses Unix domain sockets for secure local IPC (Inter-Process Communic
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   # Install Python dependencies
-   pip3 install -r requirements.txt
-   
-   # On Ubuntu/Debian, install systemd and tkinter packages
+   # On Ubuntu/Debian, install required packages
    sudo apt-get update
-   sudo apt-get install python3-tk
+   sudo apt install python3
+   sudo apt install python3-cryptography
+   sudo apt install python3-tk
    ```
 
 3. Run the installer as root:
@@ -78,28 +75,7 @@ crypto-client decrypt "gAAAAABkX..."
 ### GUI Application
 
 ```bash
-crypto-gui
-```
-
-### Integrating with Your Applications
-
-```python
-from crypto_client import CryptoClient
-
-# Create a client
-client = CryptoClient()
-
-# Encrypt data
-result = client.encrypt("secret data")
-if result['status'] == 'success':
-    encrypted_data = result['encrypted']
-    print(f"Encrypted: {encrypted_data}")
-
-# Decrypt data
-result = client.decrypt(encrypted_data)
-if result['status'] == 'success':
-    decrypted_data = result['decrypted']
-    print(f"Decrypted: {decrypted_data}")
+crypto-gui &
 ```
 
 ## Uninstallation
@@ -120,10 +96,11 @@ sudo python3 install.py --uninstall
 
 - This system protects the encryption key from user inspection but cannot protect against all attacks (e.g., memory inspection by root users).
 - The Unix socket location (/tmp/crypto_server.sock) is secured with file permissions but might need additional protection in multi-user environments.
-- For production use, consider more stringent access controls and socket placement in a restricted directory.
 
-## Virtual Machine Testing
-
-For testing purposes, this application can be installed in a virtual machine running Ubuntu 18.04 or newer. Simply follow the standard installation instructions above after setting up your VM.
-
-It's recommended to use a VM with a graphical environment for testing the GUI application. The VM should have Python 3 installed with the required dependencies. 
+# Potential improvements for production use
+- More stringent access controls and socket placement in a restricted directory
+- Use TLS for server-client communication instead of sockets
+- Authenticate users with PKI instead of local credentials
+- Separate client and server by putting the server on another machine - prevents possible memory inspection from clients that are able to elevate privileges
+- Keep access logs
+- Add ability to use multiple secrets
